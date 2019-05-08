@@ -1,5 +1,6 @@
 class Game
   attr_accessor :grid
+  
   def initialize
     @player1 = nil
     @player2 = nil
@@ -11,25 +12,44 @@ class Game
     play
   end
 
+  def valid_move(move)
+    valid_input(move) && free_space(move)
+  end
+
+  def valid_input(input)
+    input.to_i.between?(1,9)
+  end
+
+  def free_space(input)
+    x, y = move_to_coordinate(input)
+    !grid.cell_taken(x, y)
+  end
+
+
+
   private
 
   def play
     first_to_play
     alocate_tokens
-    play_turn until grid.game_end?
+    play_turn until grid.game_over
+    puts "#{@current_player.name} won!" if grid.game_over == :winner
+    puts "draw!" if grid.game_over == :draw
+    puts "\n Play again? (Y/N)"
+    play if play_again
   end
 
   def play_turn
     puts "\n#{@current_player.name} turn!"
     place_token
-    
     update_board
-    switch_players
+    switch_players if !grid.game_over
   end
 
   def play_again
     input = gets.chomp.upcase
     if input == "Y"
+      @grid = Board.new
       return true
     elsif input == "N"
       return false
@@ -38,8 +58,13 @@ class Game
 
   def place_token
     puts "Where you want to put #{@current_player.token}: "
-    x,y = move_to_coordinate(move = gets.chomp)
+    move = gets.chomp
+    if valid_move(move)
+    x, y = move_to_coordinate(move)
     grid.set_cell(x,y,@current_player.token)
+    else place_token
+    end
+
   end
 
   def create_players
@@ -50,7 +75,6 @@ class Game
   end
 
   def first_to_play
-    # @current_player = rand(0..1) == 1 ? @player1 : @player2
     if rand(0..1) == 1
       @current_player = @player1
       @other_player = @player2
@@ -69,9 +93,6 @@ class Game
     @current_player, @other_player = @other_player, @current_player
   end
 
-  def valid_move
-    # input in 1-9 range and cell empty
-  end
 
   def update_board
     grid.display
@@ -94,7 +115,6 @@ class Game
 end
 
 class Board
-
   attr_accessor :cells
   def initialize 
     @cells = default_grid
@@ -109,8 +129,12 @@ class Board
     cells[x][y] = value
   end
 
+  def cell_taken(x,y)
+    get_cell(x, y) != " "
+  end
+
   def display
-    puts "--- --- ---"
+    puts 
     puts " #{@cells[0][0]} | #{@cells[0][1]} | #{@cells[0][2]} "
     puts "--- --- ---"
     puts " #{@cells[1][0]} | #{@cells[1][1]} | #{@cells[1][2]} "
@@ -126,21 +150,39 @@ class Board
   def game_over
     return :winner if winner?
     return :draw if draw?
+    false
+  end
+
   private 
 
   def default_grid
     Array.new(3) { Array.new(3) {" "}}
   end
 
+  def winner?
+    winning_positions.each do |arr|
+      return true if arr.all? {|cell| cell == "x" } ||
+        arr.all? {|cell| cell == "o" }
+    end
+    false
+  end
+
   def draw?
-    # no empty cells on board
     cells.flatten.none? {|el| el==" "}
   end
 
-  def winner?
-    # board contains wining combination
+  def winning_positions 
+    cells +
+    cells.transpose +
+    diagonals
   end
 
+  def diagonals
+    [
+      [get_cell(0, 0), get_cell(1, 1), get_cell(2, 2)],
+      [get_cell(0, 2), get_cell(1, 1), get_cell(2, 0)]
+    ]
+  end
 end
 
 class Player
@@ -152,5 +194,4 @@ class Player
   end
 end
 
-
-
+Game.new
