@@ -12,21 +12,6 @@ class Game
     play
   end
 
-  def valid_move(move)
-    valid_input(move) && free_space(move)
-  end
-
-  def valid_input(input)
-    input.to_i.between?(1,9)
-  end
-
-  def free_space(input)
-    x, y = move_to_coordinate(input)
-    !grid.cell_taken(x, y)
-  end
-
-
-
   private
 
   def play
@@ -59,12 +44,29 @@ class Game
   def place_token
     puts "Where you want to put #{@current_player.token}: "
     move = gets.chomp
-    if valid_move(move)
+    if valid_move?(move)
     x, y = move_to_coordinate(move)
     grid.set_cell(x,y,@current_player.token)
     else place_token
     end
+  end
 
+  def valid_move?(move)
+    if !valid_input?(move)
+      puts "Invalid input, pick number 1-9: "
+    elsif !free_space?(move)
+      puts "Cell already taken, pick free one! : "
+    else return true
+    end
+  end
+
+  def valid_input?(input)
+    input.to_i.between?(1,9)
+  end
+
+  def free_space?(input)
+    x, y = move_to_coordinate(input)
+    !grid.cell_taken(x, y)
   end
 
   def create_players
@@ -92,7 +94,6 @@ class Game
   def switch_players
     @current_player, @other_player = @other_player, @current_player
   end
-
 
   def update_board
     grid.display
