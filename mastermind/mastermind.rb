@@ -33,6 +33,19 @@ module Messages
     sleep(0.3)
     print ".\n\n"
   end
+
+  def code_maker_welcome
+    clear 
+    print "You selected to be Code Maker"
+    sleep(0.3)
+    print "."
+    sleep(0.3)
+    print "."
+    sleep(0.3)
+    print "."
+    puts "Enter your secret code that this dumbass ai will try to break: "
+    puts ""
+  end
 end
 
 class Player
@@ -63,6 +76,24 @@ class Player
 end
 
 
+class Ai < Player
+  attr_accessor :guess, :correct_guess
+  def initialize 
+    @guess = Array.new(4)
+    @correct_guess = Array.new(4)
+  end
+
+  def make_guess
+    first_guess = random_code
+    
+
+  end 
+
+ 
+
+
+end
+
 class Game
   include Messages
 
@@ -76,10 +107,6 @@ class Game
     play
   end
 
-
-
-  
-
   def game_mode
     menu
     input = gets.chomp.to_i
@@ -87,7 +114,7 @@ class Game
       puts "Wrong input, please select 1 or 2"
       input = gets.chomp.to_i
     end
-    self.player = input == 1 ? Player.new : AI.new
+    self.player = input == 1 ? Player.new : Ai.new
   end
 
   def play
@@ -105,10 +132,17 @@ class Game
       break if game_over?
     end
     play_codebreaker if play_again?
+    game_mode
+    play
   end
 
   def play_codemaker
+    code_maker_welcome
+    @secret_code = player.get_code
 
+    correct_guess = Array.new(4)
+    guess = player.random_code
+    generate_feedback
   end
 
   def generate_feedback(guess)
@@ -126,10 +160,8 @@ class Game
     puts "----------------------------------------------"
     puts "#{feedback[0]}|#{feedback[1]}|#{feedback[2]}|#{feedback[3]}"
     puts "\n"
-
   end
   
-
   def game_over?
     won? || out_of_turns?
   end
@@ -153,20 +185,27 @@ class Game
 
   def play_again?
     puts "Wonna play again? (y/n)"
-    
     input = gets.chomp.upcase
     until input == "Y" || input == "N"
       puts "Wrong input, please enter Y or N"
       input = gets.chomp.upcase
     end
     if input == "Y"
+      reset
       true
     else
       puts "Tnx for playing"
       sleep(1)
+      reset
       clear
       false
     end
+  end
+
+  def reset
+    self.turns = 5
+    
+
   end
 
 end
