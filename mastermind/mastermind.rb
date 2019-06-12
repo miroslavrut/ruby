@@ -60,11 +60,11 @@ module Messages
 end
 
 class Player
-  include Messages
+  attr_accessor :guess, :name
 
   def initialize
-    
-    
+    @name = "Player"
+    @guess = Array.new(4)
   end
 
   def random_code
@@ -84,30 +84,43 @@ class Player
   def valid_input?(guess)
     guess.length == 4 && guess.all? {|num| num.between?(1,6)}
   end
+
+  def reset
+    self.guess = Array.new(4)
+  end
 end
 
 
 class Ai < Player
-  attr_accessor :guess, :correct_guess
+  attr_accessor :guess, :name, :possible_choices
+
   def initialize 
+    @name = "Aiii"
     @guess = Array.new(4)
-    @correct_guess = Array.new(4)
+    @possible_choices = [1,2,3,4,5,6]
   end
 
-  def make_guess
-    first_guess = random_code
-    
+  def make_better_guess(feedback)
+    self.guess.each_with_index do |val,index|
+      if feedback[index] == "X"
+        self.possible_choices -= [(guess[index])]
+        self.guess[index] = possible_choices.sample
+      elsif feedback[index] == "*"
+        self.guess[index] = (possible_choices - [(guess[index])]).sample
+      end
+    end
+  end
 
-  end 
-
-
-
+  def reset
+    self.guess = Array.new(4)
+    self.possible_choices = [1,2,3,4,5,6]
+  end
 end
 
 class Game
   include Messages
 
-  attr_accessor :turns, :guess, :secret_code, :player
+  attr_accessor :turns, :secret_code, :player
 
   def initialize
     @player = nil
@@ -137,8 +150,8 @@ class Game
     loop do
       puts "#{self.turns} guesses remamining."
       puts "Enter your guess: "
-      @guess = player.get_code
-      generate_feedback(self.guess)
+      player.guess = player.get_code
+      generate_feedback(player.guess)
       break if game_over?
     end
     play_codebreaker if play_again?
@@ -148,23 +161,20 @@ class Game
   def play_codemaker
     code_maker_welcome
     @secret_code = player.get_code
-
+    player.guess = player.random_code
     loop do
       puts "#{self.turns} guesses remamining."
       ai_thinking
-      
-
-      @guess = player.random_code
-      generate_feedback(self.guess)
+      generate_feedback(player.guess)
       sleep(1)
       break if game_over?
-      
+      player.guess = player.make_better_guess(get_feedback(player.guess))
     end
     play_codemaker if play_again?
     game_mode
   end
 
-  def generate_feedback(guess)
+  def get_feedback(guess)
     feedback = Array.new(4)
     guess.each_with_index do |val,index|
       if val == self.secret_code[index]
@@ -174,6 +184,11 @@ class Game
       else feedback[index] = "X"
       end
     end
+    feedback
+  end
+
+  def generate_feedback(guess)
+    feedback = get_feedback(guess)
     puts "\n"
     puts "#{guess[0]}|#{guess[1]}|#{guess[2]}|#{guess[3]}"
     puts "----------------------------------------------"
@@ -195,8 +210,8 @@ class Game
   end
 
   def won?
-    if (guess == secret_code)
-      puts "You won"
+    if (player.guess == secret_code)
+      puts "#{player.name} won"
       return true
     end
     false
@@ -223,8 +238,8 @@ class Game
 
   def reset
     self.turns = 5
+    player.reset
   end
-
 end
 
 
