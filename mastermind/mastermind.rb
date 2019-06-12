@@ -46,6 +46,17 @@ module Messages
     puts "Enter your secret code that this dumbass ai will try to break: "
     puts ""
   end
+
+  def ai_thinking
+    print "Dumbass ai is thinking"
+    sleep(0.3)
+    print "."
+    sleep(0.3)
+    print "."
+    sleep(0.3)
+    print "."
+    puts "\n Ok, here it goes: "
+  end
 end
 
 class Player
@@ -89,7 +100,6 @@ class Ai < Player
 
   end 
 
- 
 
 
 end
@@ -104,7 +114,6 @@ class Game
     @turns = 5
     welcome_screen
     game_mode
-    play
   end
 
   def game_mode
@@ -115,6 +124,7 @@ class Game
       input = gets.chomp.to_i
     end
     self.player = input == 1 ? Player.new : Ai.new
+    play
   end
 
   def play
@@ -133,16 +143,25 @@ class Game
     end
     play_codebreaker if play_again?
     game_mode
-    play
   end
 
   def play_codemaker
     code_maker_welcome
     @secret_code = player.get_code
 
-    correct_guess = Array.new(4)
-    guess = player.random_code
-    generate_feedback
+    loop do
+      puts "#{self.turns} guesses remamining."
+      ai_thinking
+      
+
+      @guess = player.random_code
+      generate_feedback(self.guess)
+      sleep(1)
+      break if game_over?
+      
+    end
+    play_codemaker if play_again?
+    game_mode
   end
 
   def generate_feedback(guess)
@@ -204,13 +223,9 @@ class Game
 
   def reset
     self.turns = 5
-    
-
   end
 
 end
-
-
 
 
 Game.new
