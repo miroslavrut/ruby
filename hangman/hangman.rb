@@ -1,3 +1,59 @@
+module TextAndImages
+  IMAGES = [
+    '
+      *---*
+      |   |
+      |    
+      |    
+      |    
+      |   
+    =============', '
+      *---*
+      |   |
+      |   O
+      |
+      |
+      |
+    ==============','
+      *---*
+      |   |
+      |   O 
+      |   | 
+      |    
+      |   
+    =============', '
+      *---*
+      |   |
+      |   O 
+      |  /| 
+      |    
+      |   
+    =============', '
+      *---*
+      |   | 
+      |   O 
+      |  /|\ 
+      |     
+      |      
+    =============', '
+      *---* 
+      |   | 
+      |   O 
+      |  /|\ 
+      |  /  
+      |      
+    =============', '
+      *---* 
+      |   | 
+      |   O  
+      |  /|\ 
+      |  / \ 
+      |   
+    =============']  
+
+  
+end 
+
 class Hangman
   def initialize
     menu
@@ -6,6 +62,7 @@ class Hangman
 end
 
 class Game
+  include TextAndImages
   attr_accessor :game
 
   def game_mode
@@ -20,6 +77,7 @@ class Game
   end
 
   def new_game
+
     fill_info
     play
   end
@@ -60,19 +118,23 @@ class Game
         puts "just one letter: "
         player_input = gets.chomp.downcase
       end
-      self.game[:secret_word_chars].each_with_index do |char, i|
-        if char == player_input
-          self.game[:display][i] = char
+      if self.game[:secret_word].include?(player_input)
+        self.game[:secret_word_chars].each_with_index do |char, i|
+          if char == player_input
+            self.game[:display][i] = char
+          end
         end
-      end
+      else
+        self.game[:uncorrect_guesses] << player_input
+      end 
     end
 
   end
 
   def game_end
-    return :turns if out_of_turns?
     return :won if won?
-     
+    return :hanged if hanged?
+    return :turns if out_of_turns?
     return false
   end
 
@@ -86,8 +148,16 @@ class Game
     self.game[:display] == self.game[:secret_word_chars]
   end
 
+  def hanged?
+    self.game[:uncorrect_guesses].length == 7
+  end
+
   def display
+    puts IMAGES[self.game[:uncorrect_guesses].length]
+
     puts self.game[:display].join(" ")
+    puts "uncorrect letters"
+    puts self.game[:uncorrect_guesses].join(" ")
   end
 
   def save_game
