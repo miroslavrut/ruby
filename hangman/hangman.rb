@@ -2,83 +2,112 @@ module TextAndImages
   IMAGES = [
     '
       *---*
-      |   |
-      |    
-      |    
-      |    
       |   
+      |    
+      |    
+      | 
+      |      
     =============', '
+      *---*
+      |   |
+      |   
+      |  
+      |
+      |
+    ==============', '
       *---*
       |   |
       |   O
       |
       |
       |
-    ==============','
+    ==============', '
       *---*
       |   |
       |   O 
       |   | 
-      |    
+      |
       |   
     =============', '
       *---*
-      |   |
+      |   | 
       |   O 
       |  /| 
-      |    
+      |
+      |      
+    =============', '
+      *---* 
+      |   | 
+      |   O 
+      |  /|\ 
+      |   
+      |      
+    =============', '
+      *---* 
+      |   | 
+      |   O
+      |  /|\
+      |  /
       |   
     =============', '
       *---*
-      |   | 
+      |   |
       |   O 
       |  /|\ 
-      |     
-      |      
-    =============', '
-      *---* 
-      |   | 
-      |   O 
-      |  /|\ 
-      |  /  
-      |      
-    =============', '
-      *---* 
-      |   | 
-      |   O  
-      |  /|\ 
-      |  / \ 
+      |  / \
       |   
-    =============']  
+    =============',]  
 
+  def menu
+    system('clear')
+    puts "***************"
+    puts "    Hangman"
+    puts "***************"
+    sleep(0.4)
+    puts "Menu: \n"
+    sleep(0.15)
+    puts "    1- new game"
+    sleep(0.15)
+    puts "    2- load"
+    sleep(0.15)
+    puts "    3- exit\n"
+  end
   
 end 
-
-class Hangman
-  def initialize
-    menu
-    game_mode
-  end
-end
 
 class Game
   include TextAndImages
   attr_accessor :game
 
+  def initialize
+    game_mode
+  end
+
   def game_mode
+    menu
     input = nil
     loop do
-      input = gets.chomp.to_i
-      break if input == 1 || input == 2
+      input = gets.chomp
+      break if input.match?(/[123]/)
       puts "Please select game mode, "
-      puts "1 for new game, 2 for load"
+      puts "1 for new game, 2 for load, 3 for exit"
     end
-    input == 1 ? new_game : load_game
+    case input
+    when "1" 
+      new_game
+    when "2"
+      load_game
+    else
+      puts "Byeee"
+      sleep(0.2)
+      exit
+    end
   end
 
   def new_game
-
+    puts `clear`
     fill_info
+    display
     play
   end
 
@@ -87,8 +116,7 @@ class Game
       play_round
       display
     end
-    puts "You won" if game_end == :won
-    puts "out of turns" if game_end == :turns
+    game_end_type
     play_again
   end
 
@@ -125,10 +153,15 @@ class Game
           end
         end
       else
-        self.game[:uncorrect_guesses] << player_input
       end 
     end
 
+  end
+
+  
+
+  def valid_letter(input)
+      
   end
 
   def game_end
@@ -143,7 +176,7 @@ class Game
     self.game[:turns] -= 1
     false
   end
-
+  
   def won?
     self.game[:display] == self.game[:secret_word_chars]
   end
@@ -152,12 +185,26 @@ class Game
     self.game[:uncorrect_guesses].length == 7
   end
 
-  def display
-    puts IMAGES[self.game[:uncorrect_guesses].length]
+  def game_end_type
+    case game_end
+    when :won
+      puts "You won"
+    when :hanged
+      puts "Game ovarrr"
+    when "turns"
+      puts "Out of turns :("
+    else 
+      puts "idk"
+    end
+    puts "\n" 
+  end
 
+  def display
+    puts `clear`
+    puts IMAGES[self.game[:uncorrect_guesses].length]
     puts self.game[:display].join(" ")
-    puts "uncorrect letters"
-    puts self.game[:uncorrect_guesses].join(" ")
+    print "\nuncorrect letters: ["
+    puts "#{self.game[:uncorrect_guesses].join(" ")}]\n"
   end
 
   def save_game
@@ -200,20 +247,19 @@ class Game
   end
 
   def play_again
-
+    input = nil
+    puts "Wonna play again? (Y/N)"
+    input = gets.chomp
+    until input.match?(/[yYnN]/)
+    input = gets.chomp
+    end
+    new_game if input.downcase == "y"
+    game_mode if input.downcase == "n"
   end
 
 
-  def menu
-    puts "***************"
-    puts "    Hangman"
-    puts "***************"
-    sleep(0.2)
-    puts "Menu: \n"
-    puts "    1- new game"
-    puts "    2- load\n"
-    game_mode
-  end
+
 
 end
 
+Game.new
