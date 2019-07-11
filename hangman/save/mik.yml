@@ -1,0 +1,33 @@
+---
+:secret_word: diamagnetism
+:secret_word_chars:
+- d
+- i
+- a
+- m
+- a
+- g
+- n
+- e
+- t
+- i
+- s
+- m
+:display:
+- _
+- i
+- a
+- m
+- a
+- _
+- n
+- e
+- _
+- i
+- _
+- m
+:missed_letters:
+- o
+- b
+:missed_words: []
+:misses: 2

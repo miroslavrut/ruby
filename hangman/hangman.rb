@@ -51,7 +51,7 @@ class Game
     when "1"
       compare_word
     when "2"
-      #save
+      save_game
     else 
       until (valid_letter(player_input))
         player_input = gets.chomp
@@ -145,11 +145,31 @@ class Game
   end
 
   def save_game
-
+    Dir.mkdir 'save' unless Dir.exist?('save')
+    puts 'Game save name?'
+    save_name = "save/#{gets.chomp}.yml"
+    File.open(save_name, 'w') { |file| file.write(self.game.to_yaml) }
+    puts 'Game has been saved'
   end
 
   def load_game
-
+    unless Dir.exist?('save')
+      puts "No save file"
+      sleep(0.6)
+      game_mode
+    end
+    save_files = Dir.entries('save').join("\n")
+    puts "Save files:"
+    puts save_files
+    puts "Which one you want to load? "
+    file_name = "save/#{gets.chomp}.yml"
+    unless File.exist?(file_name)
+      puts "That save does not exist, pick another:" 
+      file_name = "save/#{gets.chomp}.yml"
+    end
+    game_state = File.read(file_name)
+    self.game = YAML::load(game_state)
+    play_game
   end
 
   # game params
