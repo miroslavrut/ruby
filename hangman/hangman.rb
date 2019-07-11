@@ -1,79 +1,5 @@
-module TextAndImages
-  IMAGES = [
-    '
-      *---*
-      |   
-      |    
-      |    
-      | 
-      |      
-    =============', '
-      *---*
-      |   |
-      |   
-      |  
-      |
-      |
-    ==============', '
-      *---*
-      |   |
-      |   O
-      |
-      |
-      |
-    ==============', '
-      *---*
-      |   |
-      |   O 
-      |   | 
-      |
-      |   
-    =============', '
-      *---*
-      |   | 
-      |   O 
-      |  /| 
-      |
-      |      
-    =============', '
-      *---* 
-      |   | 
-      |   O 
-      |  /|\ 
-      |   
-      |      
-    =============', '
-      *---* 
-      |   | 
-      |   O
-      |  /|\
-      |  /
-      |   
-    =============', '
-      *---*
-      |   |
-      |   O 
-      |  /|\ 
-      |  / \
-      |   
-    =============',]  
-
-  def menu
-    system('clear')
-    puts "***************"
-    puts "    Hangman"
-    puts "***************"
-    sleep(0.4)
-    puts "Menu: \n"
-    sleep(0.15)
-    puts "    1- new game"
-    sleep(0.15)
-    puts "    2- load"
-    sleep(0.15)
-    puts "    3- exit\n"
-  end
-  
-end 
+require './text_and_images.rb'
+require 'yaml'
 
 class Game
   include TextAndImages
@@ -109,10 +35,6 @@ class Game
     fill_info
     display
     puts self.game[:secret_word]
-    play
-  end
-
-  def play
     until game_end
       play_round
       display
@@ -126,18 +48,7 @@ class Game
     player_input = gets.chomp
     case player_input
     when "1"
-      puts "Enter your word guess"
-      player_input = gets.chomp.downcase
-      until valid_word(player_input)
-        player_input = gets.chomp.downcase
-      end
-      if game[:secret_word] == player_input
-        self.game[:display] = player_input.split("")
-        puts "You won!!!"
-        menu
-      else 
-        puts "Nope, thats not the word"
-      end
+      compare_word
     when "2"
       #save
     else 
@@ -149,10 +60,26 @@ class Game
           end
         end
       else
-        self.game[:uncorrect_guesses] << player_input
+        self.game[:missed_letters] << player_input
       end 
     end
+    self.game[:misses] = game[:missed_letters].length + game[:missed_words].length
+  end
 
+  def compare_word
+    puts "Enter your word guess"
+    player_input = gets.chomp.downcase
+    until valid_word(player_input)
+      player_input = gets.chomp.downcase
+    end
+    if game[:secret_word] == player_input
+      self.game[:display] = player_input.split("")
+      game_end
+      menu
+    else 
+      puts "Nope, thats not the word"
+      self.game[:missed_words] << player_input
+    end
   end
 
   def valid_word(input)
@@ -170,8 +97,8 @@ class Game
     if input.length > 1 || !input.downcase.match?(/[a-z]/)
       puts "Enter one letter"
       return false
-    elsif game[:uncorrect_guesses].include?(input) ||
-       game[:display].include?(input)
+    elsif game[:missed_letters].include?(input) ||
+          game[:display].include?(input)
       puts "You already guessed that letter"
       return false
     end
@@ -181,44 +108,35 @@ class Game
   def game_end
     return :won if won?
     return :hanged if hanged?
-    return :turns if out_of_turns?
     return false
   end
 
-  def out_of_turns?
-    return true if self.game[:turns] == 0
-    self.game[:turns] -= 1
-    false
-  end
-  
   def won?
     self.game[:display] == self.game[:secret_word_chars]
   end
 
   def hanged?
-    self.game[:uncorrect_guesses].length == 7
+    self.game[:misses] == 7
   end
 
   def game_end_type
     case game_end
     when :won
-      puts "You won"
+      puts "You won\n"
     when :hanged
-      puts "Game ovarrr"
-    when "turns"
-      puts "Out of turns :("
+      puts "Game ovarrr\n"
     else 
       puts "idk"
     end
-    puts "\n" 
   end
 
   def display
     puts `clear`
-    puts IMAGES[self.game[:uncorrect_guesses].length]
+    puts IMAGES[self.game[:misses]]
     puts self.game[:display].join(" ")
-    print "\nuncorrect letters: ["
-    puts "#{self.game[:uncorrect_guesses].join(" ")}]\n"
+    print "\nmissed letters: ["
+    puts "#{self.game[:missed_letters].join(" ")}]\n"
+    puts "missed words: [#{game[:missed_words].join(" ")}]"
   end
 
   def save_game
@@ -234,18 +152,19 @@ class Game
     secret_word = read_from_file.sample
     secret_word_chars = secret_word.split("")
     display = secret_word_chars.map {|x| x = "_"}
-    uncorrect_guesses = Array.new
-    turns = 12
+    missed_letters = Array.new
+    missed_words = Array.new
+    misses = missed_letters.length + missed_words.length
 
     self.game = {
       secret_word: secret_word,
       secret_word_chars: secret_word_chars,
       display: display,
-      uncorrect_guesses: uncorrect_guesses,
-      turns: turns
+      missed_letters: missed_letters,
+      missed_words: missed_words,
+      misses: misses
     }
   end
-
 
   def read_from_file
     words = Array.new
@@ -270,10 +189,5 @@ class Game
     new_game if input.downcase == "y"
     game_mode if input.downcase == "n"
   end
-
-
-
-
 end
-
 Game.new
