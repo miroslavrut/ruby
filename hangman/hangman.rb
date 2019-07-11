@@ -127,9 +127,10 @@ class Game
   def game_end_type
     case game_end
     when :won
-      puts "You won\n"
+      puts "You won!!\n"
     when :hanged
-      puts "Game ovarrr\n"
+      puts "Game Over :(\n"
+      puts "Secret word was #{game[:secret_word]}\n"
     else 
       puts "idk"
     end
@@ -140,8 +141,8 @@ class Game
     puts IMAGES[self.game[:misses]]
     puts self.game[:display].join(" ")
     print "\nmissed letters: ["
-    puts "#{self.game[:missed_letters].join(" ")}]\n"
-    puts "missed words: [#{game[:missed_words].join(" ")}]"
+    puts "#{self.game[:missed_letters].join(" ")}]\n\n"
+    puts "missed words: [#{game[:missed_words].join(" ")}]\n\n"
   end
 
   def save_game
@@ -206,7 +207,7 @@ class Game
 
   def play_again
     input = nil
-    puts "Wonna play again? (Y/N)"
+    puts "\nWonna play again? (Y/N)"
     input = gets.chomp
     until input.match?(/[yYnN]/)
     input = gets.chomp
