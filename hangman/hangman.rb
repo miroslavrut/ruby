@@ -33,17 +33,18 @@ class Game
   def new_game
     puts `clear`
     fill_info
+    play_game
+  end
+
+  def play_game
+    play_round until game_end
     display
-    puts self.game[:secret_word]
-    until game_end
-      play_round
-      display
-    end
     game_end_type
     play_again
   end
 
   def play_round
+    display
     puts "Enter 1 to solve whole word, 2 to save, or choose letter to guess"
     player_input = gets.chomp
     case player_input
@@ -52,7 +53,9 @@ class Game
     when "2"
       #save
     else 
-      play_round if !valid_letter(player_input)
+      until (valid_letter(player_input))
+        player_input = gets.chomp
+      end
       if self.game[:secret_word].include?(player_input)
         self.game[:secret_word_chars].each_with_index do |char, i|
           if char == player_input
@@ -63,7 +66,7 @@ class Game
         self.game[:missed_letters] << player_input
       end 
     end
-    self.game[:misses] = game[:missed_letters].length + game[:missed_words].length
+    display
   end
 
   def compare_word
@@ -97,17 +100,18 @@ class Game
     if input.length > 1 || !input.downcase.match?(/[a-z]/)
       puts "Enter one letter"
       return false
-    elsif game[:missed_letters].include?(input) ||
-          game[:display].include?(input)
+    elsif game[:missed_letters].include?(input) || game[:display].include?(input)   
       puts "You already guessed that letter"
+      $stdout.flush 
       return false
+    else
+      return true
     end
-    true
   end
 
   def game_end
-    return :won if won?
     return :hanged if hanged?
+    return :won if won?
     return false
   end
 
@@ -116,6 +120,7 @@ class Game
   end
 
   def hanged?
+    game[:misses] = game[:missed_letters].length + game[:missed_words].length
     self.game[:misses] == 7
   end
 
