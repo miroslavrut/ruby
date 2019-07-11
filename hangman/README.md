@@ -10,4 +10,4 @@ Went with YAML to save/load implementation
 
 ### Note: 
 - Not really good OOP approach, but as I already procrastinated hard and that wasn't the main focus of the exercise
-I will leave it in this kinda messy state.
+I will leave it in this kinda messy state, though it got nice cmd display features :D
