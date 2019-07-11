@@ -108,6 +108,7 @@ class Game
     puts `clear`
     fill_info
     display
+    puts self.game[:secret_word]
     play
   end
 
@@ -121,15 +122,13 @@ class Game
   end
 
   def play_round
-    puts self.game[:secret_word]
     puts "Enter 1 to solve whole word, 2 to save, or choose letter to guess"
     player_input = gets.chomp
     case player_input
     when "1"
       puts "Enter your word guess"
       player_input = gets.chomp.downcase
-      until player_input.match?(/[a-z]/)
-        puts "use just letters plz"
+      until valid_word(player_input)
         player_input = gets.chomp.downcase
       end
       if game[:secret_word] == player_input
@@ -142,10 +141,7 @@ class Game
     when "2"
       #save
     else 
-      if player_input.length > 1 || ! (/[a-z]/ === player_input)
-        puts "just one letter: "
-        player_input = gets.chomp.downcase
-      end
+      play_round if !valid_letter(player_input)
       if self.game[:secret_word].include?(player_input)
         self.game[:secret_word_chars].each_with_index do |char, i|
           if char == player_input
@@ -153,15 +149,33 @@ class Game
           end
         end
       else
+        self.game[:uncorrect_guesses] << player_input
       end 
     end
 
   end
 
-  
+  def valid_word(input)
+    if input.length != game[:secret_word].length
+      puts "Care, wanted word have #{game[:secret_word].length} letters"
+      return false
+    elsif !input.match?(/[a-z]/)
+      puts "Just letters plz"
+      return false
+    end
+    true
+  end
 
   def valid_letter(input)
-      
+    if input.length > 1 || !input.downcase.match?(/[a-z]/)
+      puts "Enter one letter"
+      return false
+    elsif game[:uncorrect_guesses].include?(input) ||
+       game[:display].include?(input)
+      puts "You already guessed that letter"
+      return false
+    end
+    true
   end
 
   def game_end
