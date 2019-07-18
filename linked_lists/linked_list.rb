@@ -1,9 +1,9 @@
 class Node
-  attr_accessor :value, :pointer
+  attr_accessor :value, :next_node
 
-  def initialize(value = nil, pointer = nil)
+  def initialize(value = nil, next_node = nil)
     @value = value
-    @pointer = pointer
+    @next_node = next_node
   end
 end
 
@@ -11,24 +11,23 @@ class LinkedList
   attr_reader :head, :tail
 
   def initialize
-    @head = nil
+    @head = Node.new('head', nil)
   end
 
   def append(value)
-    self.tail.pointer = Node.new(value, nil)
+    self.tail.next_node = Node.new(value, nil)
   end 
 
-
   def prepend(value)
-    self.head.pointer = Node.new(value, self.head.pointer)
+    self.head.next_node = Node.new(value, self.head.next_node)
   end
 
   def size
-    if self.head.pointer
-      node = self.head.pointer
+    if self.head.next_node
+      node = self.head.next_node
       i = 1
-      while node.pointer
-        node = node.pointer
+      while node.next_node
+        node = node.next_node
         i += 1
       end
       return i
@@ -42,10 +41,10 @@ class LinkedList
   end
 
   def tail
-    if self.head.pointer
-      node = self.head.pointer
-      while node.pointer
-        node = node.pointer
+    if self.head.next_node
+      node = self.head.next_node
+      while node.next_node
+        node = node.next_node
       end
       node
     else
@@ -54,13 +53,13 @@ class LinkedList
   end
 
   def pop
-    if self.head.pointer
-      node = self.head.pointer
-      while node.pointer.pointer
-        node = node.pointer
+    if self.head.next_node
+      node = self.head.next_node
+      while node.next_node.next_node
+        node = node.next_node
       end
-      popping = node.pointer
-      node.pointer = nil
+      popping = node.next_node
+      node.next_node = nil
       return popping
     else
       return nil
@@ -68,13 +67,13 @@ class LinkedList
   end
 
   def contains?(value)
-    if self.head.pointer
-      node = self.head.pointer
-      while node.pointer
+    if self.head.next_node
+      node = self.head.next_node
+      while node.next_node
         if node.value == value
           return true
         else
-          node = node.pointer
+          node = node.next_node
         end
       end
       return false
@@ -84,14 +83,14 @@ class LinkedList
   end
 
   def find(value)
-		if @head.pointer
-			node = @head.pointer
+		if @head.next_node
+			node = @head.next_node
 			i = 0
-			while node.pointer
+			while node.next_node
 				if node.value == value
 					return i
 				else
-					node = node.pointer
+					node = node.next_node
 					i += 1
 				end
 			end
@@ -102,43 +101,64 @@ class LinkedList
   end
 
   def to_s
-		if @head.pointer
-			s = "(#{@head.pointer.value}) -> "
-			node = @head.pointer
-			while node.pointer
-				s += "(#{node.pointer.value}) -> "
-				node = node.pointer
-			end
-			s += "nil"
-			return s
-		else
-			return "nil"
-		end
-	end
+    if self.head.next_node
+      s = "(#{@head.next_node.value}) -> "
+      node = self.head.next_node
+      while node.next_node
+        s += "(#{node.next_node.value}) -> "
+        node = node.next_node
+      end
+      s += "nil"
+      return s
+    else
+      return "nil"
+    end
+  end
 
-	def at(index)
-		if self.size > index
-			if @head.pointer
-				node = @head.pointer
-				i = 0
-				until i == index
-					node = node.pointer
-					i += 1
-				end
-				return node
-			else
-				return nil
-			end
-		end
-		return nil
-	end
+  def at(index)
+    if self.size > index
+      if self.head.next_node
+        node = self.head.next_node
+        i = 0
+        until i == index
+          node = node.next_node
+          i += 1
+        end
+        return node
+      else
+        return nil
+      end
+    end
+    return nil
+  end
 
 	def insert_at(index,value)
-		self.at(index-1).pointer = Node.new(value,self.at(index-1).pointer)
+		self.at(index-1).next_node = Node.new(value,self.at(index-1).next_node)
 	end
 
 	def remove_at(index)
-		self.at(index-1).pointer = self.at(index).pointer
+		self.at(index-1).next_node = self.at(index).next_node
 	end
 end
 
+a = LinkedList.new   # => #<LinkedList:0x000055dc61afacd8 @head=#<Node:0x000055dc61af9ec8 @value="head", @next_node=nil>>
+a.append(3)   # => #<Node:0x000055dc61b023c0 @value=3, @next_node=nil>
+a.append(4)   # => #<Node:0x000055dc61b979c0 @value=4, @next_node=nil>
+
+a   # => #<LinkedList:0x000055dc61afacd8 @head=#<Node:0x000055dc61af9ec8 @value="head", @next_node=#<Node:0x000055dc61b023c0 @value=3, @next_node=#<Node:0x000055dc61b979c0 @value=4, @next_node=nil>>>>
+
+a.pop   # => #<Node:0x000055dc61b979c0 @value=4, @next_node=nil>
+
+a # => #<LinkedList:0x000055dc61afacd8 @head=#<Node:0x000055dc61af9ec8 @value="head", @next_node=#<Node:0x000055dc61b023c0 @value=3, @next_node=nil>>>
+
+a.prepend(2)    # => #<Node:0x000055dc61b94b58 @value=2, @next_node=#<Node:0x000055dc61b023c0 @value=3, @next_node=nil>>
+
+a # => #<LinkedList:0x000055dc61afacd8 @head=#<Node:0x000055dc61af9ec8 @value="head", @next_node=#<Node:0x000055dc61b94b58 @value=2, @next_node=#<Node:0x000055dc61b023c0 @value=3, @next_node=nil>>>>
+a.size # => 2
+
+a.find(4)   # => nil
+a.append(4)
+a.size    # => 3
+a.find(3)   # => 1
+
+a.insert_at(1,5)   # => #<Node:0x000055dc61c06028 @value=5, @next_node=#<Node:0x000055dc61b023c0 @value=3, @next_node=#<Node:0x000055dc61c06b68 @value=4, @next_node=nil>>>
