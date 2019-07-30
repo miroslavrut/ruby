@@ -1,5 +1,5 @@
-require "./board.rb"
-require "./player.rb"
+require "board.rb"
+require "player.rb"
 
 class Game
   attr_accessor :grid
@@ -121,6 +121,6 @@ class Game
   end
 end
 
-Game.new
+# Game.new
 
 
