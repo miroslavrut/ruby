@@ -2,7 +2,7 @@ require "board.rb"
 require "player.rb"
 
 class Game
-  attr_accessor :grid
+  attr_accessor :grid, :player1, :player2, :current_player, :other_player
   
   def initialize
     @player1 = nil
@@ -12,10 +12,10 @@ class Game
     @grid = Board.new
     
     create_players
-    play
+    # play
   end
 
-  private
+  # private
 
   def play
     first_to_play

@@ -37,7 +37,7 @@ class Board
     false
   end
 
-  private 
+  # private 
 
   def default_grid
     Array.new(3) { Array.new(3) {" "}}
